@@ -76,6 +76,7 @@ public class LeanSWOAuth2IdentityProvider implements OAuth2IdentityProvider {
 
     @Override
     public void init(InitContext context) {
+        context.getRequest().getHeader()
         OAuthServiceWrapper scribe = new OAuthServiceWrapper(settings);
         String url = scribe.getAuthorizationUrl(context.getCallbackUrl());
         context.redirectTo(url);
@@ -91,11 +92,11 @@ public class LeanSWOAuth2IdentityProvider implements OAuth2IdentityProvider {
     }
 
     public void onCallback(CallbackContext context) throws IOException {
-        context.verifyCsrfState();
         HttpServletRequest request = context.getRequest();
         OAuthServiceWrapper scribe = new OAuthServiceWrapper(settings);
         String code = request.getParameter("code");
         String accessToken = scribe.getAccessToken(code, context.getCallbackUrl());
+        LOGGER.info("accessToken: {}", accessToken);
         User user = getUser(accessToken);
         UserIdentity userIdentity = userIdentityFactory.create(user, null);
         context.authenticate(userIdentity);
@@ -105,7 +106,7 @@ public class LeanSWOAuth2IdentityProvider implements OAuth2IdentityProvider {
 
     private User getUser(String accessToken) throws IOException {
         String responseBody = OAuth2API.getProfile(accessToken);
-        LOGGER.trace("User response received : {}", responseBody);
+        LOGGER.info("User response received : {}", responseBody);
         return User.parse(responseBody);
     }
 
