@@ -19,39 +19,22 @@
  */
 package com.thoughtworks.lean.oauth2;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.io.IOException;
-
-import static org.mockito.Mockito.when;
 
 /**
  * Created by yongliuli on 9/10/16.
  */
-@RunWith(MockitoJUnitRunner.class)
-public class TestGetAccessToken {
-
-    @Mock
-    LeanSWOAuth2Settings leanSWOAuth2Settings;
-
-    @Before
-    public void setup() {
-        when(leanSWOAuth2Settings.apiURL()).thenReturn("http://cas.dev.twleansw.com:9080/");
-        when(leanSWOAuth2Settings.clientId()).thenReturn("clientid");
-        when(leanSWOAuth2Settings.clientSecret()).thenReturn("clientSecret");
-
+public class TestURLUtil {
+    @Test
+    public void should_get_return_url_from_url() {
+        String retUrl = URLUtil.getReturnUrlFromReferer("https://sonar.dev.twleansw.com/sessions/new?return_to=%2F");
+        Assert.assertEquals("https://sonar.dev.twleansw.com/",retUrl);
     }
 
-
     @Test
-    @Ignore
-    public void test() throws IOException {
-        OAuthServiceWrapper oAuthServiceWrapper = new OAuthServiceWrapper(leanSWOAuth2Settings);
-        oAuthServiceWrapper.getAccessToken("ST-26-myePfsllQ3x5dHIzxLgC-cas.dev.twleansw.com:9080","https://sonar.dev.twleansw.com/oauth2/callback/leansw-oauth2");
+    public void should_get_return_url_from_url2() {
+        String retUrl = URLUtil.getReturnUrlFromReferer("https://sonar.dev.twleansw.com:9443/sessions/new?return_to=%2Fhelp");
+        Assert.assertEquals("https://sonar.dev.twleansw.com:9443/help",retUrl);
     }
 }

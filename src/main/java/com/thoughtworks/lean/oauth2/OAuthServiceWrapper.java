@@ -64,24 +64,9 @@ public class OAuthServiceWrapper {
     }
 
 
-    public String getAccessToken2(String code, String callbackUrl) throws IOException {
-        final URL url = new URL(String.format("%s?code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
-                getAccessTokenEndpoint(),
-                URLEncoder.encode(code, "UTF-8"),
-                URLEncoder.encode(callbackUrl, "UTF-8"),
-                settings.clientId(),
-                settings.clientSecret()));
-        final HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestMethod("POST");
-        con.setInstanceFollowRedirects(true);
-        DataOutputStream out = new DataOutputStream(con.getOutputStream());
-        out.flush();
-        return responseToAccessToken(IOUtils.toString(con.getInputStream()));
-    }
 
     public String getAccessToken(String code, String callbackUrl) throws IOException {
+
         Request request = new Request.Builder()
                 .url(String.format(
                         "%s?redirect_uri=%s&client_id=%s&client_secret=%s&code=%s",

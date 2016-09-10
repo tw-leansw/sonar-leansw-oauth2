@@ -38,8 +38,10 @@ public class LeanSWOAuth2IdentityProvider implements OAuth2IdentityProvider {
     private final LeanSWOAuth2Settings settings;
     private final UserIdentityFactory userIdentityFactory;
     private final OAuthServiceWrapper OAuth2API;
+    private static final String SESSION_KEY_RET_URL = "leansw-oauth2.ret.url";
 
     public LeanSWOAuth2IdentityProvider(LeanSWOAuth2Settings settings, UserIdentityFactory userIdentityFactory, OAuthServiceWrapper scribeApi) {
+
         this.settings = settings;
         this.userIdentityFactory = userIdentityFactory;
         this.OAuth2API = scribeApi;
@@ -76,9 +78,12 @@ public class LeanSWOAuth2IdentityProvider implements OAuth2IdentityProvider {
 
     @Override
     public void init(InitContext context) {
-        context.getRequest().getHeader()
+
+        String referer = context.getRequest().getHeader("Referer");
+        LOGGER.info("referer: {}", referer);
         OAuthServiceWrapper scribe = new OAuthServiceWrapper(settings);
         String url = scribe.getAuthorizationUrl(context.getCallbackUrl());
+        context.getRequest().getSession().setAttribute(SESSION_KEY_RET_URL, URLUtil.getReturnUrlFromReferer(referer));
         context.redirectTo(url);
     }
 
@@ -100,7 +105,12 @@ public class LeanSWOAuth2IdentityProvider implements OAuth2IdentityProvider {
         User user = getUser(accessToken);
         UserIdentity userIdentity = userIdentityFactory.create(user, null);
         context.authenticate(userIdentity);
-        context.redirectToRequestedPage();
+        String retUrl = (String) context.getRequest().getSession().getAttribute(SESSION_KEY_RET_URL);
+        if (retUrl == null) {
+            context.redirectToRequestedPage();
+        } else {
+            context.getResponse().sendRedirect(retUrl);
+        }
     }
 
 
